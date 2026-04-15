@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "https://fld.emadpr.online/$1"
+    }
+  ]
+}
