@@ -1,25 +1,32 @@
-export const config = {
-    runtime: 'edge'
+export const config = { 
+    runtime: 'edge' 
 };
 
 export default async function handler(request) {
     try {
         const url = new URL(request.url);
         
-        // هدایت ترافیک به سمت سرور فنلاند شما
+        // هدایت ترافیک به سمت سرور فنلاند
         url.hostname = "fld.emadpr.online";
         
-        // اگر در فنلاند از پورت دیگری غیر از 443 استفاده می‌کنید، خط زیر را از کامنت درآورید و پورت را بنویسید
-        // url.port = "8443"; 
-
-        const modifiedRequest = new Request(url.toString(), {
-            headers: request.headers,
+        // کپی کردن هدرها و تغییر هدر Host برای عبور از سد کلودفلر
+        const newHeaders = new Headers(request.headers);
+        newHeaders.set('Host', 'fld.emadpr.online');
+        
+        // آماده‌سازی تنظیمات درخواست
+        const reqInit = {
             method: request.method,
-            body: request.body,
-            redirect: 'follow'
-        });
+            headers: newHeaders,
+            redirect: 'manual'
+        };
+        
+        // در متدهای GET نباید Body ارسال شود، در غیر این صورت ورسل ارور می‌دهد
+        if (request.method !== 'GET' && request.method !== 'HEAD') {
+            reqInit.body = request.body;
+        }
 
-        return await fetch(modifiedRequest);
+        // ارسال درخواست اصلاح شده به فنلاند
+        return await fetch(url.toString(), reqInit);
     } catch (e) {
         return new Response(e.message, { status: 500 });
     }
